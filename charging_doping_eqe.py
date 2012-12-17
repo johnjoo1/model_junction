@@ -41,6 +41,7 @@ from solar.contacts import OhmicContact
 from solar.traps import ShockleyReadHallTrap
 from solar.lights import AM1_5
 
+import pylab
 
 class EqeDoping(object):
     def __init__(self, Na, Nd):
@@ -180,11 +181,30 @@ class EqeDoping(object):
                 wavelength_point, eqe_point = i
                 f.write('{wavelength}\t{eqe}\n'.format(wavelength=wavelength_point, eqe=eqe_point))
                 
-    def view(self):
-        if hasattr(self, 'viewer'):
-            self.viewer.plot()
+    def view(self, legend = False):
+        '''
+        The fipy.viewer method doesn't seem to update after a single loop.
+        '''
+#        if hasattr(self, 'viewer'):
+#            self.viewer.plot()
+#        else:
+#            self.viewer = Viewer(vars=(self.diode.Ec, self.diode.Efn, self.diode.Efp, self.diode.Ev))
+        if hasattr(self, 'plot_band'):
+            self.plot_band.plot(self.x.value, self.diode.Ec.value, label = '$E_c$')
+            self.plot_band.plot(self.x.value, self.diode.Ev.value, label = '$E_v$')
+            self.plot_band.plot(self.x.value, self.diode.Efn.value, label = '$E_fn$')
+            self.plot_band.plot(self.x.value, self.diode.Efp.value, label = '$E_fp$')
+            pylab.draw()
         else:
-            self.viewer = Viewer(vars=(self.diode.Ec, self.diode.Efn, self.diode.Efp, self.diode.Ev))
+            fig = pylab.figure() 
+            self.plot_band = fig.add_subplot(111)
+            self.plot_band.plot(self.x.value, self.diode.Ec.value, label = '$E_c$')
+            self.plot_band.plot(self.x.value, self.diode.Ev.value, label = '$E_v$')
+            self.plot_band.plot(self.x.value, self.diode.Efn.value, label = '$E_fn$')
+            self.plot_band.plot(self.x.value, self.diode.Efp.value, label = '$E_fp$')
+            pylab.draw()
+            if legend == True:
+                pylab.legend()
 
     def equilibrium_check(self):
         if [round(x,2) for x in self.diode.Efp.value] == [round(x,2) for x in self.diode.Efn.value]:
