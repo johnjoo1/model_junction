@@ -99,8 +99,6 @@ class EqeDoping(object):
         self.nContact = nContact
         self.pContact = pContact
 
-    #    Nd = 1e24 #m**-3
-    #    Na = 1e21 #m**-3
         self.Na=Na
         self.Nd=Nd
 
@@ -140,37 +138,22 @@ class EqeDoping(object):
     def nt(self, t, A=1, c = 0):
         return A*numerix.log(self.diode.generationRate.value*t) + c
     
-    def solve_dark(self, view=False, save = False):
+    def solve_dark(self, save = False):
         # solve in dark and then illuminate
         self.diode.darken()
         self.diode.solve(solver=None, sweeps=10, outer_tol=1e4)
-        
-#        if view == True:
-#            if hasattr(self, 'viewer'):
-#                self.view()
-#            else:
-#                self.viewer = Viewer(vars=(self.diode.Ec, self.diode.Efn, self.diode.Efp, self.diode.Ev))
-                
-#                self.npViewer = Viewer(vars=(self.diode.n, self.diode.p), log=True)
         if save == True:
             self.diode.save('dark{Na}.band'.format(Na=self.Na))
     
-    def solve_light(self, view=False, save = False):
-
+    def solve_light(self,  save = False):
         self.light = AM1_5(orientation=[[1]], 
-                      faces=self.illuminatedFaces)
-                      
+                      faces=self.illuminatedFaces)                    
         # sample the light source from 300 nm to 1 um at 10 nm intervals
         self.diode.illuminate(self.light(wavelength=numerix.arange(300e-9, 1000e-9, 10e-9))) # m
         self.diode.solve(solver=None, sweeps=10, outer_tol=1e4)
         if save == True:
             self.diode.save('light{Na}.band'.format(Na=self.Na))
-#        if view == True:
-#            if hasattr(self, 'viewer') and hasattr(self,'npViewer'):
-#                self.view()
-#            else:
-#                self.viewer = Viewer(vars=(self.diode.Ec, self.diode.Efn, self.diode.Efp, self.diode.Ev))
-#                self.npViewer = Viewer(vars=(self.diode.n, self.diode.p), log=True)
+
 
     def solve_eqe(self, view=False, save = False):
         self.eqe_spectrum = self.diode.EQE(self.light, numerix.arange(320e-9,700e-9, 1e-9), path=None, adapt=True)
@@ -198,9 +181,16 @@ class EqeDoping(object):
                 f.write('{wavelength}\t{eqe}\n'.format(wavelength=wavelength_point, eqe=eqe_point))
                 
     def view(self):
-        self.viewer.plot()
-#        self.npViewer.plot()    
-        
+        if hasattr(self, 'viewer'):
+            eqedoping.self.viewer.plot()
+        else:
+            eqedoping.viewer = Viewer(vars=(self.diode.Ec, self.diode.Efn, self.diode.Efp, self.diode.Ev))
+
+    def equilibrium_check(self):
+        if [round(x,2) for x in self.diode.Efp.value] == [round(x,2) for x in self.diode.Efn.value]:
+            return True #is in equilibrium
+        else:
+            return False #
             
 if __name__ == "__main__":  
     time = numerix.arange(0,10)
@@ -208,35 +198,28 @@ if __name__ == "__main__":
         if t == 0:
             Na = 1e20
             eqedoping = EqeDoping(Na,1e24)
-            eqedoping.light = AM1_5(orientation=[[1]], 
-                      faces=eqedoping.illuminatedFaces)
         else:
 #            Na = (Na + eqedoping.nt(t))*(eqedoping.x.value>=eqedoping.n_thickness)
             Na = 1e20
             eqedoping.change_doping(Na)
             print Na
-        eqedoping.diode.darken()
         eqedoping.solve_dark(view=False,save=False)
         
         print 'dark'
-        if [round(x,2) for x in eqedoping.diode.Efp.value] == [round(x,2) for x in eqedoping.diode.Efn.value]:
+        if eqedoping.equilibrium_check():
             print 'Efn = Efp'
         else:
             print 'not equilibrium!!!'
 
-        if hasattr(eqedoping, 'viewer'):
-            eqedoping.view()
-        else:
-            eqedoping.viewer = Viewer(vars=(eqedoping.diode.Ec, eqedoping.diode.Efn, eqedoping.diode.Efp, eqedoping.diode.Ev))
+        eqedoping.view()
         raw_input('wait.')
         
-        eqedoping.diode.illuminate(eqedoping.light(wavelength=numerix.arange(300e-9, 1000e-9, 1e-9))) 
-        eqedoping.diode.solve(solver=None, sweeps=10, outer_tol=1e4)
+        eqedoping.solve_light(view=False, save=False)
         print 'illuminated'
-#        eqedoping.solve_light(view=False, save=False)
+        
 #        eqedoping.solve_eqe(view=True, save=True)
 
-        if [round(x,2) for x in eqedoping.diode.Efp.value] == [round(x,2) for x in eqedoping.diode.Efn.value]:
+        if equilibrium_check():
             print 'Efn = Efp'
         else:
             print 'obviously, not equilibrium.  under illumination.'
