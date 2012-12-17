@@ -182,9 +182,9 @@ class EqeDoping(object):
                 
     def view(self):
         if hasattr(self, 'viewer'):
-            eqedoping.self.viewer.plot()
+            self.viewer.plot()
         else:
-            eqedoping.viewer = Viewer(vars=(self.diode.Ec, self.diode.Efn, self.diode.Efp, self.diode.Ev))
+            self.viewer = Viewer(vars=(self.diode.Ec, self.diode.Efn, self.diode.Efp, self.diode.Ev))
 
     def equilibrium_check(self):
         if [round(x,2) for x in self.diode.Efp.value] == [round(x,2) for x in self.diode.Efn.value]:
@@ -203,7 +203,7 @@ if __name__ == "__main__":
             Na = 1e20
             eqedoping.change_doping(Na)
             print Na
-        eqedoping.solve_dark(view=False,save=False)
+        eqedoping.solve_dark(save=False)
         
         print 'dark'
         if eqedoping.equilibrium_check():
@@ -214,12 +214,12 @@ if __name__ == "__main__":
         eqedoping.view()
         raw_input('wait.')
         
-        eqedoping.solve_light(view=False, save=False)
+        eqedoping.solve_light( save=False)
         print 'illuminated'
         
 #        eqedoping.solve_eqe(view=True, save=True)
 
-        if equilibrium_check():
+        if eqedoping.equilibrium_check():
             print 'Efn = Efp'
         else:
             print 'obviously, not equilibrium.  under illumination.'
