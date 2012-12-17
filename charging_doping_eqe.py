@@ -226,27 +226,4 @@ if __name__ == "__main__":
         raw_input('wait.')
         
     
-#def view():
-#    viewer.plot()
-#    npViewer.plot()
-#    
-#JV = diode.JV(contact=nContact, 
-#              biases=ParsimoniousIterator(start=0., stop=0.9, num=20), # V
-#              path="JV.txt",
-#              sweeps=11, outer_tol=1e-4, currentContinuity=1.,
-#              callback=view)
-
-#raw_input("Voc")
-
-#Voc = diode.Voc(contact=nContact, JV=JV)
-
-#print "Voc = ", Voc
-
-#raw_input("Vmax")
-#                            
-#Vmax = diode.Vmax(contact=nContact, JV=JV, Vtol=0.01, Ptol=0.01)
-
-#print "Vmax = ", Vmax
-
-#raw_input("done")
-#                            
+                            
