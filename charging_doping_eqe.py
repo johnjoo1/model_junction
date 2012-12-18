@@ -213,16 +213,14 @@ class EqeDoping(object):
             return False #
             
 if __name__ == "__main__":  
-    time = numerix.arange(0,10)
-    for t in time:
-        if t == 0:
+    time = 10**numerix.arange(0,100000)
+    for i,t in enumerate(time):
+        if i == 0:
             Na = 1e20
             eqedoping = EqeDoping(Na,1e24)
         else:
-#            Na = (Na + eqedoping.nt(t))*(eqedoping.x.value>=eqedoping.n_thickness)
-            Na = 1e20
+            Na = eqedoping.nt(t)*(eqedoping.x.value>=eqedoping.n_thickness)
             eqedoping.change_doping(Na)
-            print Na
         eqedoping.solve_dark(save=False)
         
         print 'dark'
@@ -232,7 +230,7 @@ if __name__ == "__main__":
             print 'not equilibrium!!!'
 
         eqedoping.view()
-        raw_input('wait.')
+#        raw_input('wait.')
         
         eqedoping.solve_light( save=False)
         print 'illuminated'
@@ -243,7 +241,7 @@ if __name__ == "__main__":
             print 'Efn = Efp'
         else:
             print 'obviously, not equilibrium.  under illumination.'
-        raw_input('wait.')
+#        raw_input('wait.')
         
     
                             
