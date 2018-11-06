@@ -1,2 +1,2 @@
-# From grad school
+ # From grad school
 pn junctions
